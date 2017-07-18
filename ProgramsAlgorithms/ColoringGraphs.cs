@@ -9,10 +9,9 @@ namespace ProgramsAlgorithms
 {
     public abstract class ColoringGraphs
     {
-        public abstract int[] GetPaintedVertices(Graph graphToPaint, int limit, bool verbose);
+        public abstract int[] GetPaintedVertices(Graph graphToPaint, int limit, bool verbose, out int nbOfColorsUse);
         public abstract string Name { get; }
-        public int ColorsUsedCount { get; set; }
-        protected int[] PaintVerticesGreedily(Graph graphToPaint, int limit, int[] sortedVertices)
+        protected int[] PaintVerticesGreedily(Graph graphToPaint, int limit, int[] sortedVertices, out int nbOfColorsUsed) 
         {
             int[] verticesColors = new int[graphToPaint.VerticesCount];
             for (int i = 0; i < verticesColors.Length; i++)
@@ -49,7 +48,7 @@ namespace ProgramsAlgorithms
                     verticesColors[currentVertex] = verticesInSameColorCount.Count - 1;
                 }
             }
-            ColorsUsedCount = verticesInSameColorCount.Count;
+            nbOfColorsUsed = verticesInSameColorCount.Count;
             return verticesColors;
         }
 

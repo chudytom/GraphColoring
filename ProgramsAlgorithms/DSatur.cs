@@ -11,13 +11,14 @@ namespace ProgramsAlgorithms
     {
         public override string Name => "DSatur";
 
-        public override int[] GetPaintedVertices(Graph graphToPaint, int limit, bool verbose)
+        public override int[] GetPaintedVertices(Graph graphToPaint, int limit, bool verbose, out int nbOfColorsUsed)
         {
-            Graph graphCopy = graphToPaint.Clone();
-            return PaintGraph(graphToPaint, limit, verbose);
-        }
+            Graph graphCopy = graphToPaint.Clone();  
+            int[] ret = PaintGraph(graphToPaint, limit, verbose, out nbOfColorsUsed);
+            return ret;
+        }   
 
-        private int[] PaintGraph(Graph graphToPaint, int limit, bool verbose)
+        private int[] PaintGraph(Graph graphToPaint, int limit, bool verbose, out int nbOfColorsUsed)
         {
             int verticesCount = graphToPaint.VerticesCount;
             int[] sortedVertices;
@@ -78,7 +79,7 @@ namespace ProgramsAlgorithms
                 }
             }
             PrintColors(verbose, sortedVertices, verticesColors);
-            ColorsUsedCount = verticesInSameColorCount.Count;
+            nbOfColorsUsed = verticesInSameColorCount.Count;
             return verticesColors;
         }
     }
