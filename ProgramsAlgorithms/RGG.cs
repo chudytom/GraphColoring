@@ -64,12 +64,14 @@ namespace ProgramsAlgorithms
             int verticesCount = rnd.Next(4, 100);
             Graph wheel = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
             int i;
-            for (i = 1; i < verticesCount; i++)
+            //Tu w pierwszej iteracji robił podwójną krawędź z 0 do 1
+            for (i = 1; i < verticesCount - 1; i++)
             {
-                wheel.AddEdge(new Edge(i - 1, i));
                 wheel.AddEdge(new Edge(0, i));
+                wheel.AddEdge(new Edge(i, i + 1));
             }
-            wheel.AddEdge(new Edge(i - 1, 1));
+            wheel.AddEdge(new Edge(0, i));
+            wheel.AddEdge(new Edge(1, i));
             return wheel;
         }
         public static Graph helm()
@@ -79,14 +81,17 @@ namespace ProgramsAlgorithms
                 verticesCount++;
             Graph helm = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
             int i;
+            //Tutaj też w pierwszej iteracji robi podwójną krawędź z 0 do 1
             int ringSize = verticesCount / 2;
-            for (i = 1; i <= ringSize; i++)   // od 1:vCount/2 pierwszy "ring" od vCount/2+1:vCount-1 drugi "ring"
+            for (i = 1; i < ringSize; i++)   // od 1:vCount/2 pierwszy "ring" od vCount/2+1:vCount-1 drugi "ring"
             {
-                helm.AddEdge(new Edge(i - 1, i));
                 helm.AddEdge(new Edge(0, i));
+                helm.AddEdge(new Edge(i, i + 1));
                 helm.AddEdge(new Edge(i, ringSize + i));     // połączenie z drugim ringiem
             }
-            helm.AddEdge(new Edge(i - 1, 1));
+            helm.AddEdge(new Edge(0, i));
+            helm.AddEdge(new Edge(i, 1));
+            helm.AddEdge(new Edge(i, ringSize + i));
             return helm;
         }
         public static Graph closedHelm()
@@ -98,7 +103,8 @@ namespace ProgramsAlgorithms
             {
                 helmm.AddEdge(new Edge(i, i + 1));
             }
-            helmm.AddEdge(new Edge(2 * ringSize, ringSize));
+            //Ostatnia krawędź łączyłą się z wierzchołkiem wewnętrznego cyklu
+            helmm.AddEdge(new Edge(2 * ringSize, ringSize + 1));
             return helmm;
         }
         public static Graph webGraph()
@@ -116,10 +122,11 @@ namespace ProgramsAlgorithms
                     web.AddEdge(new Edge(j * ringSize + i - 1, (j + 1) * ringSize + i - 1));
                 }
             }
+            //Wg mnie cykl nie był wcześniej domykany
             for (int j = 0; j < nOfCycles; j++)
             {
-                web.AddEdge(new Edge(j * ringSize + i - 1, (j + 1) * ringSize + i - 1));
-                web.AddEdge(new Edge((j + 1) * ringSize - 1, (j + 2) * ringSize - 1));
+                web.AddEdge(new Edge(j * ringSize, j * ringSize + i - 1));
+                web.AddEdge(new Edge(j * ringSize + i - 1, 2 * j * ringSize + i - 1));
             }
             return web;
         }
