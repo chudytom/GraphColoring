@@ -15,7 +15,9 @@ namespace ProgramsAlgorithms
         public static Graph path()
         {
             Graph cyclee = cycle();
-            Edge e = cyclee.OutEdges(1).ElementAt(0);
+            int vert = rnd.Next(0, 100);
+            int neibNb = rnd.Next(0, 1);
+            Edge e = cyclee.OutEdges(vert).ElementAt(neibNb);
             cyclee.DelEdge(e.From, e.To);
             return cyclee;
         }
@@ -72,15 +74,14 @@ namespace ProgramsAlgorithms
         public static Graph wheel()
         {
             int verticesCount = rnd.Next(4, 101);
-            Graph wheel = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
+            Graph cycle = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
             int i;
-            for (i = 1; i < verticesCount; i++)
-            {
-                wheel.AddEdge(new Edge(i - 1, i));
-                wheel.AddEdge(new Edge(0, i));
-            }
-            wheel.AddEdge(new Edge(i - 1, 1));
-            return changeVerticesNumeration(wheel);
+            for (i = 1; i < verticesCount-1; i++)
+            { cycle.AddEdge(i - 1, i); cycle.AddEdge(i, i - 1); }
+            cycle.AddEdge(0, verticesCount - 2); cycle.AddEdge(verticesCount - 2, 0);
+            for (i = 0; i < verticesCount -1; i++)
+            cycle.AddEdge(i, verticesCount - 1); cycle.AddEdge(verticesCount - 1, i);            
+            return changeVerticesNumeration(cycle);
         }
         public static Graph rawHelm()
         {
@@ -113,29 +114,30 @@ namespace ProgramsAlgorithms
             {
                 helm.AddEdge(new Edge(i, i + 1));
             }
-            helm.AddEdge(new Edge(2 * ringSize, ringSize));
+            helm.AddEdge(new Edge(2 * ringSize, ringSize + 1));
             return changeVerticesNumeration(helm);
         }
         public static Graph webGraph()
         {
-            int nOfCycles = rnd.Next(1, 15);
-            int ringSize = rnd.Next(3, 1000 / (nOfCycles + 1));
-            int verticesCount = (nOfCycles + 1) * ringSize;
+            int nOfCycles = rnd.Next(2, 15);
+            int ringSize = rnd.Next(3, 1000 / nOfCycles );
+            int verticesCount = nOfCycles * ringSize;
             Graph web = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
-            int i;
-            for (i = 1; i < ringSize; i++)   // od 1:vCount/2 pierwszy "ring" od vCount/2+1:vCount-1 drugi "ring"
+            int i,j;
+            for (j = 0; j < nOfCycles -1; j++)
             {
-                for (int j = 0; j < nOfCycles; j++)
+                for (i = 1; i < ringSize; i++)   // od 1:vCount/2 pierwszy "ring" od vCount/2+1:vCount-1 drugi "ring"
                 {
                     web.AddEdge(new Edge(j * ringSize + i - 1, j * ringSize + i));
                     web.AddEdge(new Edge(j * ringSize + i - 1, (j + 1) * ringSize + i - 1));
                 }
             }
-            for (int j = 0; j < nOfCycles; j++)
-            {
-                web.AddEdge(new Edge(j * ringSize + i - 1, (j + 1) * ringSize + i - 1));
+            for (i = 1; i < ringSize; i++)   // ostatni cykl
+                web.AddEdge(new Edge(j * ringSize + i - 1, j * ringSize + i));
+            for (j = 0; j < nOfCycles; j++)    // domknięcie cykli 
+                web.AddEdge(new Edge(j * ringSize, (j + 1) * ringSize - 1));              
+            for (j = 0; j < nOfCycles - 1; j++) // polaczenie miedzycyklowe ostatnich wierzcholkow cyklu
                 web.AddEdge(new Edge((j + 1) * ringSize - 1, (j + 2) * ringSize - 1));
-            }
             return changeVerticesNumeration(web);
         }
         public static Graph treeOfPolygons()
