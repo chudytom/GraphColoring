@@ -15,9 +15,8 @@ namespace ProgramsAlgorithms
         public static Graph path()
         {
             Graph cyclee = cycle();
-            int vert = rnd.Next(0, 100);
-            int neibNb = rnd.Next(0, 1);
-            Edge e = cyclee.OutEdges(vert).ElementAt(neibNb);
+            int vert = rnd.Next(0, cyclee.VerticesCount);
+            Edge e = cyclee.OutEdges(vert).ElementAt(0);
             cyclee.DelEdge(e.From, e.To);
             return cyclee;
         }
@@ -26,9 +25,35 @@ namespace ProgramsAlgorithms
             int verticesCount = rnd.Next(3, 100);
             Graph cycle = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
             for (int i = 1; i < verticesCount; i++)
-            { cycle.AddEdge(i - 1, i); cycle.AddEdge(i, i-1); }
-                cycle.AddEdge(0, verticesCount -1); cycle.AddEdge(verticesCount - 1, 0);
-            return changeVerticesNumeration(cycle);
+            cycle.AddEdge(i - 1, i); 
+                cycle.AddEdge(0, verticesCount -1);
+            cycle = changeVerticesNumeration(cycle);
+            /* // checking changeVerticesNumeration() method
+            if (cycle.VerticesCount < 11)
+            {
+                int vert = 0;
+                int vold = -1;
+                int v = 0;
+                Console.Write("vert count = " + verticesCount);
+                Console.WriteLine();
+                Edge e; ;
+                do
+                {
+                    Console.Write(v + " ");
+                    e = cycle.OutEdges(v).ToArray()[0];
+                    if (e.To == vold || e.From == vold)
+                        e = cycle.OutEdges(v).ToArray()[1];
+                    vold = v;
+                    if (vold == e.To)
+                        v = e.From;
+                    else
+                        v = e.To;
+                }
+                while (v != vert);
+                Console.WriteLine();
+            }
+            */
+            return cycle;
         }
         public static Graph tree()
         {
@@ -73,15 +98,15 @@ namespace ProgramsAlgorithms
         //new AdjacencyListsGraph<AVLAdjacencyList>(true,3) { new Edge(0,1), new Edge(1,2), new Edge(2,0) };        
         public static Graph wheel()
         {
-            int verticesCount = rnd.Next(4, 101);
-            Graph cycle = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
-            int i;
-            for (i = 1; i < verticesCount-1; i++)
-            { cycle.AddEdge(i - 1, i); cycle.AddEdge(i, i - 1); }
-            cycle.AddEdge(0, verticesCount - 2); cycle.AddEdge(verticesCount - 2, 0);
-            for (i = 0; i < verticesCount -1; i++)
-            cycle.AddEdge(i, verticesCount - 1); cycle.AddEdge(verticesCount - 1, i);            
-            return changeVerticesNumeration(cycle);
+            int veticesCount = rnd.Next(4, 101);
+            Graph wheel = new AdjacencyListsGraph<SimpleAdjacencyList>(false, veticesCount);            
+            for (int i = 1; i<veticesCount; i++)
+            {
+                wheel.AddEdge(0, i);
+                wheel.AddEdge(i - 1, i);
+            }
+            wheel.AddEdge(1, veticesCount - 1);
+            return changeVerticesNumeration(wheel);
         }
         public static Graph rawHelm()
         {
@@ -91,13 +116,13 @@ namespace ProgramsAlgorithms
             Graph helm = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
             int i;
             int ringSize = verticesCount / 2;
-            for (i = 1; i <= ringSize; i++)   // od 1:vCount/2 pierwszy "ring" od vCount/2+1:vCount-1 drugi "ring"
+            for (i = 1; i <= ringSize; i++)   // od 1:ringSize pierwszy "ring" od ringsize+1:2*ringSize drugi "ring"
             {
                 helm.AddEdge(new Edge(i - 1, i));
                 helm.AddEdge(new Edge(0, i));
                 helm.AddEdge(new Edge(i, ringSize + i));     // połączenie z drugim ringiem
             }
-            helm.AddEdge(new Edge(i - 1, 1));
+            helm.AddEdge(new Edge(ringSize, 1));
             return helm;
         }
         public static Graph helm()
@@ -110,7 +135,7 @@ namespace ProgramsAlgorithms
             Graph helm = rawHelm();
             int ringSize = helm.VerticesCount / 2;
             int i;
-            for (i = ringSize + 1; i < 2 * ringSize; i++)   // od 1:vCount/2 pierwszy "ring" od vCount/2+1:vCount-1 drugi "ring"
+            for (i = ringSize + 1; i < 2 * ringSize; i++)   // 1:ringSize pierwszy "ring" ringSize+1:2*ringSize drugi "ring"
             {
                 helm.AddEdge(new Edge(i, i + 1));
             }
@@ -118,6 +143,26 @@ namespace ProgramsAlgorithms
             return changeVerticesNumeration(helm);
         }
         public static Graph webGraph()
+        {
+            int nOfCycles = rnd.Next(2, 15);
+            int ringSize = rnd.Next(3, 1000 / nOfCycles );
+            int verticesCount = nOfCycles * ringSize;
+            Graph web = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
+            int i,j;
+            for (j = 0; j < nOfCycles; j++)
+                for (i = 1; i < ringSize; i++)   // 0:ringsize-1 pierwszy "ring"; ringsize:2*ringsize-1 drugi "ring"
+                    web.AddEdge(new Edge(j * ringSize + i - 1, j * ringSize + i));
+            for (j = 0; j < nOfCycles; j++)     // domknięcie cykli
+                web.AddEdge(new Edge(j * ringSize, (j + 1) * ringSize - 1));  
+            for (j = 0; j < nOfCycles - 1; j++) // polaczenie miedzycyklowe 
+                for (i = 0; i < ringSize; i++)
+                    web.AddEdge(new Edge(j * ringSize + i, (j + 1) * ringSize + i));
+            for (j = 0; j < nOfCycles - 1; j++) // polaczenie miedzycyklowe ostatnich wierzcholkow cyklu
+                web.AddEdge(new Edge(( j + 1 ) * ringSize - 1, (j + 2) * ringSize - 1));                   
+            return changeVerticesNumeration(web);
+        }
+        /* old
+         public static Graph webGraph()
         {
             int nOfCycles = rnd.Next(2, 15);
             int ringSize = rnd.Next(3, 1000 / nOfCycles );
@@ -140,22 +185,36 @@ namespace ProgramsAlgorithms
                 web.AddEdge(new Edge((j + 1) * ringSize - 1, (j + 2) * ringSize - 1));
             return changeVerticesNumeration(web);
         }
+
+            */
         public static Graph treeOfPolygons()
         {
             int verticesCount = rnd.Next(3, 1000);
             Graph poligonTree = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
-            int i = 0; int connectingNode = 0;
+            List<Edge> freeEdges = new List<Edge>();
+            Edge e = new Edge(0, 1);
+            poligonTree.Add(e);
+            freeEdges.Add(e);
+            int i = 1;
             while (i < verticesCount - 1)
             {
-                int polygonsize = rnd.Next(1, 6);
+                int polygonsize = rnd.Next(3, 7);
                 polygonsize = Math.Min(polygonsize, verticesCount - i - 1);
-                poligonTree.AddEdge(connectingNode, ++i);
-                for (int j = 0; j < polygonsize - 1; j++)
-                    poligonTree.AddEdge(i, ++i);
                 if (polygonsize > 2)
-                    poligonTree.AddEdge(i, i - (polygonsize - 1));
-                if (rnd.Next(2) > 0)   // szansa na zmiane connecting node'a == 0.5
-                    connectingNode = i - rnd.Next(polygonsize);
+                {                    
+                    poligonTree.AddEdge(e.To, ++i); freeEdges.Add(new Edge(e.To, i));
+                    for (int j = 0; j < polygonsize - 1; j++)
+                    {
+                        poligonTree.AddEdge(i, ++i);
+                        freeEdges.Add(new Edge(i-1, i));
+                    }
+                    poligonTree.AddEdge(i, e.From);
+                    freeEdges.Add(new Edge(i, e.From));
+                }
+                else
+                    break;
+                e = freeEdges[rnd.Next(freeEdges.Count)];
+                freeEdges.Remove(e);
             }
             return changeVerticesNumeration(poligonTree);
         }
@@ -208,25 +267,23 @@ namespace ProgramsAlgorithms
         {
             int k, l, r; // k - size of a bead; l - length of path; r - nb of beads
             k = rnd.Next(3, 7);
-            l = rnd.Next(1, 5);
+            l = rnd.Next(2, 7);
             r = rnd.Next(3, 15);
-            int verticesCount = (k + l - 1) * r + 1; // tu k + l -1 ????
+            int verticesCount = (k + l) * r; 
             Graph necklace = new AdjacencyListsGraph<SimpleAdjacencyList>(false, verticesCount);
-            int bead; int i = 0; int toPathStart = k / 2 - 1;
-            for (bead = 0; bead < r; bead++)   // dla ostatniego bead'a ostatni paciorek polaczony z node'em 0
+            int i = 0; int toPathStart = k / 2 - 1;
+            for (int bead = 0; bead < r; bead++)
             {
-                for (int j = 0; j < k - 1; j++)
+                for (int j = 0; j < k; j++)
                     necklace.AddEdge(i, ++i);
-                necklace.AddEdge(i, i - (k - 1));
+                necklace.AddEdge(i, i - k);   // bead done
                 necklace.AddEdge(i - toPathStart, ++i);
-                if (i == verticesCount - 1)
-                { necklace.AddEdge(i, 0); break; }
+                if (bead == r - 1)
+                    l--;
                 for (int j = 0; j < l - 1; j++)
-                    if (i == verticesCount - 1)
-                    { necklace.AddEdge(i, 0); break; }
-                    else
-                        necklace.AddEdge(i, ++i);
+                    necklace.AddEdge(i, ++i);       // path done    
             }
+            necklace.AddEdge(verticesCount - 1, 0);  // for the last bead the last vertice connected with vertice 0
             return changeVerticesNumeration(necklace);
         }
         public static Graph eulerian()
@@ -234,7 +291,7 @@ namespace ProgramsAlgorithms
             int verticesCount = rnd.Next(4, 1000);
             double density = rnd.Next(verticesCount,1000);
             density /= 1000;
-            Graph eulerian = rgg.EulerGraph(typeof(AdjacencyListsGraph<SimpleAdjacencyList>), false, verticesCount, 0.1);
+            Graph eulerian = rgg.EulerGraph(typeof(AdjacencyListsGraph<SimpleAdjacencyList>), false, verticesCount, density);
             return changeVerticesNumeration(eulerian);
         }
         public static Graph hamiltonian()
@@ -293,7 +350,7 @@ namespace ProgramsAlgorithms
             double density = rnd.Next(3, 1000);
             density /= 1000;            
             Graph bipartite = rgg.BipariteGraph(typeof(AdjacencyListsGraph<SimpleAdjacencyList>), n, m, density);
-            return bipartite;
+            return changeVerticesNumeration(bipartite);
         }
         public static Graph random()
         {
@@ -320,50 +377,14 @@ namespace ProgramsAlgorithms
             permutation = permutation.OrderBy(x => rnd.Next()).ToArray();
             return permutation;
         }
-        public static int[] cycl (int from, int to)
-        {
-            int n = 2 * (to - from);
-            int[] permutation = new int[n];
-            for (int i = 0; i < n; i++)
-                permutation[i] = i;
-            permutation = permutation.OrderBy(x => rnd.Next()).ToArray();
-            // tu dopisac
-            return permutation;
-        }
         public static Graph changeVerticesNumeration(Graph g)
         {
             int[] perm = permutation(g.VerticesCount);
-            int i, p;
-            for ( i = 0; i< g.VerticesCount; i++)
-            {
-                p = perm[i];
-                List<Edge> neiI = g.OutEdges(i).ToList();
-                List<Edge> neiP = g.OutEdges(p).ToList();
-                int vertice;
-                foreach (var e in neiI)
-                    if (e.To != p)
-                    {
-                        if (e.To == i)
-                            vertice = e.From;
-                        else
-                            vertice = e.To;
-                        g.DelEdge(e);
-                        g.AddEdge(p, vertice);
-                        g.AddEdge(vertice, p);
-                    }
-                foreach (var e in neiP)
-                    if (e.To != i)
-                    {
-                        if (e.To == p)
-                            vertice = e.From;
-                        else
-                            vertice = e.To;
-                        g.DelEdge(e);
-                        g.AddEdge(i, vertice);
-                        g.AddEdge(vertice, i);
-                    }
-            }
-            return g;
+            Graph gnew = new AdjacencyListsGraph<SimpleAdjacencyList>(false, g.VerticesCount);
+            for (int i = 0; i < g.VerticesCount; i++)
+                foreach (Edge e in g.OutEdges(i))
+                    gnew.AddEdge( perm[e.From], perm[e.To] );
+            return gnew;
         }
     }
 }
